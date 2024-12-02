@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, TIMESTAMP, Text, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
+from .database import Base
 
 
 class User(Base):
@@ -40,19 +40,3 @@ class Comment(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     article = relationship("Article", back_populates="comments")
-
-
-class Calculation(Base):
-    __tablename__ = 'calculations'
-    calc_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.user_id', ondelete='CASCADE'))
-    calculation_type = Column(String(50), nullable=False)
-    parameters = Column(JSON, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
-
-
-class Graph(Base):
-    __tablename__ = 'graphs'
-    graph_id = Column(Integer, primary_key=True, index=True)
-    calc_id = Column(Integer, ForeignKey('calculations.calc_id', ondelete='CASCADE'))
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())

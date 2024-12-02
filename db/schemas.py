@@ -19,8 +19,3 @@ class ArticleCreate(ArticleBase):
 
 class CommentBase(BaseModel):
     content: str
-
-class CalculationBase(BaseModel):
-    calculation_type: str
-    parameters: dict
-    result: dict
