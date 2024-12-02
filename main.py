@@ -1,25 +1,15 @@
-import asyncio
-from logging import getLogger
+from flet import Page
 
-from flet import (
-    app,
-    Page,
-    Text,
-)
-import flet.version
-
-logger = getLogger(__name__)
+# from db.database import init_db, SessionLocal
+# from db.crud import create_user, get_user_by_email
 
 
-async def main(page: Page) -> None:
-    await asyncio.sleep(1)
-    page.title = "Calculator"
-    page.fonts = {
-        "Roboto Mono": "RobotoMono-VariableFont_wght.ttf",
-        "RobotoSlab": "RobotoSlab[wght].ttf",
-    }
-    page.add(Text("Test!"))
+def main(page: Page):
+    ...
 
 
-if __name__ == '__main__':
-    app(target=main)
+if __name__ == "__main__":
+    # init_db()
+    # db = SessionLocal()
+    ...
+
