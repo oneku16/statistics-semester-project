@@ -6,6 +6,7 @@ from flet import (
     Text,
     SnackBar,
     Row,
+    BarChart
 )
 
 from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
@@ -16,5 +17,13 @@ from app.src.utils import switch_view
 from app.src.views.calculator import calculator
 
 
-class CalculatorComponents(WithDB,):
+class InputColumn(WithDB, Column):
+    ...
+
+
+class GraphColumn(WithDB, Column):
+    ...
+
+
+class CalculatorComponents(WithDB, Row):
     ...
