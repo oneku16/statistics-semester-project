@@ -11,3 +11,7 @@ class Normal:
 
     def get_parameters(self):
         return self._mu, self._sigma
+
+
+a = Normal()
+a.__getstate__()

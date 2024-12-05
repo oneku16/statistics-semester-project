@@ -20,5 +20,3 @@ class HyperGeometric(BarChart):
         # self.rv = hypergeom(M, n, N)
         # self.x = np.arange(0, n + 1)
         # self.pmf = self.rv.pmf(self.x)
-
-
