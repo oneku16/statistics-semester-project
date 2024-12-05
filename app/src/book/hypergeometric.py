@@ -11,12 +11,11 @@ class HyperGeometricBarChartGroup(BarChartGroup):
 
 
 class HyperGeometric(BarChart):
-    def __init__(self, page: Page):
+    def __init__(self, M=1, n=2, N=3):
         super().__init__()
-        self.page = page
-        # self._M = M
-        # self._n = n
-        # self._N = N
-        # self.rv = hypergeom(M, n, N)
-        # self.x = np.arange(0, n + 1)
-        # self.pmf = self.rv.pmf(self.x)
+        self._param_M = M
+        self._param_n = n
+        self._param_N = N
+        self.rv = hypergeom(M, n, N)
+        self.x = np.arange(0, n + 1)
+        self.pmf = self.rv.pmf(self.x)

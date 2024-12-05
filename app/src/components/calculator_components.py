@@ -1,3 +1,4 @@
+from cProfile import label
 from enum import Enum
 
 from flet import (
@@ -34,50 +35,12 @@ SELECTOR = {
 }
 
 
-class Intervals(Row):
-    def __init__(self, page: Page):
-        super().__init__()
-        self.page = page
-        self._interval = None
-        self.controls = [
-            ElevatedButton(
-                text="Left sided",
-                on_click=lambda _: self.select_input_format(LeftSided)
-            ),
-            ElevatedButton(
-                text="Interval",
-                on_click=lambda _: self.select_input_format(Interval),
-            ),
-            ElevatedButton(
-                text="Right sided",
-                on_click=lambda _: self.select_input_format(RightSided)
-            )
-        ]
-
-    def select_input_format(self, input_format):
-        self._interval = input_format(page=self.page)
-
-    @property
-    def interval(self):
-        if self._interval is None:
-            self._interval = LeftSided(page=self.page)
-        return self._interval
-
-
 class CalculatorsDropdown(Dropdown):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
         self.value = CalculatorsEnum.NORMAL.value
         self.options = self.get_options()
-
-    @property
-    def real_value(self):
-        return self.value
-
-    @property
-    def calculator(self):
-        return SELECTOR[self.value]
 
     @staticmethod
     def get_options() -> list[dropdown.Option]:
@@ -91,33 +54,80 @@ class InputColumn(Column):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
-        self.calculator = Normal()
-        self.interval = LeftSided(page=page)
-        self.intervals = Intervals(page=page)
-        self.calculators_dropdown = CalculatorsDropdown(page=page)
-        self.params = None
+        self.calculators_dropdown = self.__build_calculators_dropdown()
+        self.calculator = self.__build_calculator()
+        self.interval = self.__build_interval()
+        self.params = self.__build_calculator_params()
         self.controls = [
             self.calculators_dropdown,
-            self.intervals,
-            *self.real_params,
-            *self.interval.controls
+            self.interval,
+            self.params,
+            LeftSided(page=self.page)
         ]
+        self.page.update()
 
-    @property
-    def real_params(self):
-        if self.params is None:
-            self.params = list()
-            for param in self.get_params():
-                param = param[1:]
-                self.params.append(TextField(label=param))
-        return self.params
+    def __build_calculators_dropdown(self) -> Dropdown:
+        calculators_dropdown = Dropdown(
+                on_change=self.calculators_dropdown_on_change,
+                value=CalculatorsEnum.NORMAL.value,
+                options=[
+                    dropdown.Option(member.value) for member in CalculatorsEnum
+                ]
+            )
+        return calculators_dropdown
 
-    def get_params(self):
+    def __build_calculator(self, calculator_key: str = '') -> object:
+        calculator_key = calculator_key or self.calculators_dropdown.value
+        calculator_class = SELECTOR[calculator_key]
+        calculator = calculator_class()
+        return calculator
+
+    def __build_calculator_params(self) -> Column:
+        column = Column(
+            controls=[
+                    TextField(label=param) for param in self.__get_calculator_params()
+            ]
+        )
+        return column
+
+    def __get_calculator_params(self):
         params = list()
         for key, _ in self.calculator.__getstate__().items():
-            if key.startswith('_'):
+            if key.startswith('_param_'):
+                key = key.replace('_param_', '')
                 params.append(key)
         return params
+
+    def calculators_dropdown_on_change(self, event):
+        calculator = self.__build_calculator(self.calculators_dropdown.value)
+        self.calculator = calculator
+        self.calculator = self.__build_calculator()
+        self.params = self.__build_calculator_params()
+        self.controls[-2] = self.params
+        self.page.update()
+
+    def __build_interval(self) -> Row:
+        row = Row(
+            controls=[
+                ElevatedButton(
+                    text="Left sided",
+                    on_click=lambda _: self.select_input_format(LeftSided)
+                ),
+                ElevatedButton(
+                    text="Interval",
+                    on_click=lambda _: self.select_input_format(Interval),
+                ),
+                ElevatedButton(
+                    text="Right sided",
+                    on_click=lambda _: self.select_input_format(RightSided)
+                )
+            ],
+        )
+        return row
+
+    def select_input_format(self, input_format):
+        self.controls[-1] = input_format(page=self.page)
+        self.page.update()
 
 
 class GraphColumn(Column):
@@ -130,6 +140,33 @@ class CalculatorComponent(WithDB, Row):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
+        # self.controls = [
+        #     # header
+        #     Row(
+        #         controls=[
+        #
+        #         ],
+        #     ),
+        #     # main row
+        #     Row(
+        #         controls=[
+        #             # input column
+        #             Column(
+        #                 controls=[
+        #
+        #                 ],
+        #             ),
+        #             # graph column
+        #             Column(
+        #                 controls=[
+        #
+        #                 ],
+        #             ),
+        #         ],
+        #     ),
+        # ]
+
+
         self.controls = [
             Column(
                 controls=[

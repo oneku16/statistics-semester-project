@@ -5,13 +5,16 @@ class LeftSided(Row):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
-        self._x = TextField(label='x')
+        self._x = TextField(label='x', width=60, height=40)
         self.controls = [
-            Text(value='P(X<= '),
-            self._x,
-            Text(value=')')
+            Row(
+                controls=[
+                    Text(value='P(X<='),
+                    self._x,
+                    Text(value=')'),
+                ],
+            ),
         ]
-        self.page.update()
 
     @property
     def x(self):
@@ -24,11 +27,14 @@ class RightSided(Row):
         self.page = page
         self._x = TextField(label='x')
         self.controls = [
-            Text(value='P('),
-            self._x,
-            Text(value='<=X)')
+            Row(
+                controls=[
+                    Text(value='P('),
+                    self._x,
+                    Text(value='<=X)')
+                ]
+            ),
         ]
-        self.page.update()
 
     @property
     def x(self):
@@ -42,10 +48,14 @@ class Interval(Row):
         self._x1 = TextField(label='x1')
         self._x2 = TextField(label='x2')
         self.controls = [
-            Text(value='P('),
-            self._x1,
-            Text(value='X<=X'),
-            self._x2,
+            Row(
+                controls=[
+                    Text(value='P('),
+                    self._x1,
+                    Text(value='X<=X'),
+                    self._x2,
+                ]
+            ),
         ]
 
     @property
