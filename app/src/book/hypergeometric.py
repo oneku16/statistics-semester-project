@@ -10,7 +10,7 @@ class HyperGeometricBarChartGroup(BarChartGroup):
     ...
 
 
-class HyperGeometric(BarChart):
+class HyperGeometric:
     def __init__(self, M=1, n=2, N=3):
         super().__init__()
         self._param_M = M
