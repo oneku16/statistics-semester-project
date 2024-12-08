@@ -28,6 +28,7 @@ from app.src.views.calculator import calculator
 class CalculatorsEnum(Enum):
     NORMAL = "Normal"
     HYPER_GEOMETRIC = "HyperGeometric"
+    BIN = ""
 
 
 SELECTOR = {
@@ -84,12 +85,10 @@ class InputColumn(Column):
 
         self.__get_intervals()
 
-
     def __get_intervals(self):
         params = self.input_format.get_params()
         print(params)
         return params
-
 
     def __get_calculator_values(self):
         for textfield in self.params.controls:

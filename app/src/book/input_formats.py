@@ -27,9 +27,7 @@ class LeftSided(Row):
         return self._x.value
 
     def get_params(self):
-        if self._x.value == '':
-            return tuple()
-        return float(self._x.value),
+        return self._x.value,
 
     def __str__(self):
         return 'LeftSided'
@@ -110,7 +108,7 @@ class Interval(Row):
         return self._x2.value
 
     def get_params(self):
-        return float(self._x1.value), float(self._x2.value),
+        return self._x1.value, self._x2.value,
 
     def __repr__(self):
         return 'Interval'
