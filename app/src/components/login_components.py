@@ -19,8 +19,8 @@ class LoginReturn(WithDB, Column):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
-        self.email_username = TextField(value="eku.ulanov@gmail.com", label="Email or Username", width=300)
-        self.password = TextField(value="admin", label="Password", password=True, width=300)
+        self.email_username = TextField(value="a@a.a", label="Email or Username", width=300)
+        self.password = TextField(value="a", label="Password", password=True, width=300)
         self.alignment = MainAxisAlignment.CENTER,
         self.horizontal_alignment = CrossAxisAlignment.CENTER,
         self.controls=[
@@ -39,7 +39,7 @@ class LoginReturn(WithDB, Column):
                     ),
                     ElevatedButton(
                         text="Sign Up",
-                        on_click=self.handle_login,
+                        on_click=self.handle_signup,
                     ),
                 ],
             )
@@ -51,10 +51,7 @@ class LoginReturn(WithDB, Column):
             user_instance = get_user_by_email(self.db, self.email_username.value)
         else:
             user_instance = get_user_by_username(self.db, self.email_username.value)
-        if user_instance and self.pwd_context.verify(
-            self.password.value,
-            user_instance.password_hash,
-        ):
+        if user_instance and self.password.value == user_instance.password_hash:
             self.page.client_storage.set("user_id", user_instance.user_id)
             self.page.client_storage.set("username", user_instance.username)
             self.page.snack_bar = SnackBar(Text("Login successful!"))
@@ -64,3 +61,7 @@ class LoginReturn(WithDB, Column):
             self.page.snack_bar = SnackBar(Text("Invalid credentials"), bgcolor="red")
         self.page.snack_bar.open = True
         self.page.update()
+
+    def handle_signup(self, event):
+        from app.src.components.sign_up_components import SignUp
+        switch_view(page=self.page, control=SignUp(page=self.page))

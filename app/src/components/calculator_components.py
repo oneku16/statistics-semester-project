@@ -14,6 +14,7 @@ from flet import (
     dropdown,
     Container,
 )
+from flet.core.matplotlib_chart import MatplotlibChart
 
 from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment, TextAlign
 
@@ -83,11 +84,11 @@ class InputColumn(Column):
         for attr, value in self.__get_calculator_values():
             self.calculator.__setattr__(f'_param_{attr}', float(value))
 
-        self.__get_intervals()
+        area, graph = self.calculator.solve(*self.__get_intervals())
+        return area, graph
 
     def __get_intervals(self):
         params = self.input_format.get_params()
-        print(params)
         return params
 
     def __get_calculator_values(self):
@@ -121,14 +122,13 @@ class InputColumn(Column):
         return column
 
     def __get_calculator_params(self):
-        for key in self.calculator.__getstate__():
+        for key in self.calculator.__dict__:
             if key.startswith('_param_'):
                 key = key.replace('_param_', '')
                 yield key
 
     def calculators_dropdown_on_change(self, event):
-        calculator = self.__build_calculator(self.calculators_dropdown.value)
-        self.calculator = calculator
+        self.calculator = self.__build_calculator(self.calculators_dropdown.value)
         self.calculator = self.__build_calculator()
         self.params = self.__build_calculator_params()
         self.controls[2] = self.params
@@ -167,70 +167,57 @@ class GraphColumn(Column):
         super().__init__()
         self.page = page
 
+    def set_graph(self, graph):
+        fig = MatplotlibChart(
+            figure=graph,
+            expand=True
+        )
+        self.controls = [fig]
+        print(type(graph))
+        print(self.controls)
+        self.page.update()
 
-class CalculatorComponent(WithDB, Row):
+
+class CalculatorComponent(WithDB, Column):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
-        # self.controls = [
-        #     # header
-        #     Row(
-        #         controls=[
-        #
-        #         ],
-        #     ),
-        #     # main row
-        #     Row(
-        #         controls=[
-        #             # input column
-        #             Column(
-        #                 controls=[
-        #
-        #                 ],
-        #             ),
-        #             # graph column
-        #             Column(
-        #                 controls=[
-        #
-        #                 ],
-        #             ),
-        #         ],
-        #     ),
-        # ]
-
-
+        self.calculator = None
+        self.calculators_dropdown = self.__build_calculators_dropdown()
+        self.calculator = self.__build_calculator()
+        self.interval = self.__build_interval()
+        self.params = self.__build_calculator_params()
+        self.input_format = self.__default_input_format()
+        self.on_solve = self.__build_solve_button()
         self.controls = [
-            Column(
+            # header row index=0
+            Row(
                 controls=[
-                    Row(
+
+                ]
+            ),
+            # main row index=1
+            Row(
+                controls=[
+                    # input column index=0
+                    Column(
                         controls=[
-                            Text(
-                                value="Calculator",
-                                weight=FontWeight.BOLD,
-                                text_align=TextAlign.CENTER,
-                                on_tap=switch_view(self.page, self),
-                            ),
-                            Text(
-                                value="Calculator",
-                                weight=FontWeight.BOLD,
-                                text_align=TextAlign.RIGHT,
-                            ),
-                            ElevatedButton(
-                                text="Logout",
-                                on_click=self.handler_logout,
-                                animate_scale=True,
-                            ),
+                            self.calculators_dropdown,
+                            self.interval,
+                            self.params,
+                            self.input_format,
+                            self.on_solve,
                         ]
                     ),
-                    Row(
-                        controls=[
-                            InputColumn(page=self.page),
-                            GraphColumn(page=self.page),
-                        ],
-                    )
+                    # graph column index 1
+                    Column(
+                        alignment=MainAxisAlignment.CENTER,
+                        horizontal_alignment=CrossAxisAlignment.CENTER,
+                    ),
                 ]
             ),
         ]
+        self.page.update()
 
     def handler_logout(self, event):
         from app.src.components.login_components import LoginReturn as LocalLoginReturn
@@ -238,3 +225,95 @@ class CalculatorComponent(WithDB, Row):
         self.page.client_storage.remove("username")
         switch_view(page=self.page, control=LocalLoginReturn(page=self.page))
         self.page.update()
+
+    def __build_solve_button(self):
+        button = ElevatedButton(
+            text="Solve",
+            on_click=self.__on_solve,
+        )
+        return button
+
+    def __on_solve(self, event):
+        for attr, value in self.__get_calculator_values():
+            self.calculator.__setattr__(f'_param_{attr}', float(value))
+
+        area, graph = self.calculator.solve(*self.__get_intervals())
+        self.controls[1].controls[1].controls.append(MatplotlibChart(figure=graph, original_size=True, expand=True))
+        self.page.update()
+        print(area)
+        return area, graph
+
+    def __get_intervals(self):
+        params = self.input_format.get_params()
+        return params
+
+    def __get_calculator_values(self):
+        for textfield in self.params.controls:
+            if textfield.value is None or textfield.value == '':
+                continue
+            yield textfield.label, textfield.value
+
+    def __build_calculators_dropdown(self) -> Dropdown:
+        calculators_dropdown = Dropdown(
+                on_change=self.calculators_dropdown_on_change,
+                value=CalculatorsEnum.NORMAL.value,
+                options=[
+                    dropdown.Option(member.value) for member in CalculatorsEnum
+                ]
+            )
+        return calculators_dropdown
+
+    def __build_calculator(self, calculator_key: str = '') -> object:
+        calculator_key = calculator_key or self.calculators_dropdown.value
+        calculator_class = SELECTOR[calculator_key]
+        calculator = calculator_class()
+        return calculator
+
+    def __build_calculator_params(self) -> Column:
+        column = Column(
+            controls=[
+                    TextField(label=param) for param in self.__get_calculator_params()
+            ]
+        )
+        return column
+
+    def __get_calculator_params(self):
+        for key in self.calculator.__dict__:
+            if key.startswith('_param_'):
+                key = key.replace('_param_', '')
+                yield key
+
+    def calculators_dropdown_on_change(self, event):
+        self.calculator = self.__build_calculator(self.calculators_dropdown.value)
+        self.calculator = self.__build_calculator()
+        self.params = self.__build_calculator_params()
+        self.controls[1].controls[0].controls[2] = self.params
+        self.page.update()
+
+    def __build_interval(self) -> Row:
+        row = Row(
+            controls=[
+                ElevatedButton(
+                    text="Left sided",
+                    on_click=lambda _: self.__update_input_format(LeftSided)
+                ),
+                ElevatedButton(
+                    text="Interval",
+                    on_click=lambda _: self.__update_input_format(Interval),
+                ),
+                ElevatedButton(
+                    text="Right sided",
+                    on_click=lambda _: self.__update_input_format(RightSided)
+                )
+            ],
+        )
+        return row
+
+    def __update_input_format(self, input_format):
+        self.input_format = input_format(page=self.page)
+        self.controls[1].controls[0].controls[-2] = self.input_format
+        self.page.update()
+
+    def __default_input_format(self):
+        return LeftSided(page=self.page)
+

@@ -1,6 +1,5 @@
-from numpy import linspace
+from numpy import linspace, inf
 from scipy.stats import norm
-import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
@@ -13,7 +12,10 @@ class Normal:
     def get_parameters(self):
         return self._param_mu, self._param_sigma
 
-    def solve(self, a, b):
+    def solve(self, a=None, b=None):
+        if b is None:
+            b = a
+            a = -inf
         a = float(a)
         b = float(b)
         x = linspace(self._param_mu - 3 * self._param_sigma, self._param_mu + 3 * self._param_sigma, 512)  # Generate x values from -4 to 4
@@ -38,6 +40,5 @@ class Normal:
         buf.seek(0)
         plt.close(fig)  # Close the figure to avoid memory leaks
         area = norm.cdf(b, 0, 1) - norm.cdf(a, 0, 1)
-
-        return area
-
+        area = f'{area:.4f}'
+        return area, fig
