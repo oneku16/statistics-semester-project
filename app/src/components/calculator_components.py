@@ -19,6 +19,7 @@ from flet.core.matplotlib_chart import MatplotlibChart
 from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment, TextAlign
 
 from app.src.book.hypergeometric import HyperGeometric
+from app.src.book.binomial import Binomial
 from app.src.book.normal import Normal
 from app.src.components.base import WithDB
 from app.src.utils import switch_view
@@ -29,12 +30,13 @@ from app.src.views.calculator import calculator
 class CalculatorsEnum(Enum):
     NORMAL = "Normal"
     HYPER_GEOMETRIC = "HyperGeometric"
-    BIN = ""
+    BINOMIAL = "Binomial"
 
 
 SELECTOR = {
     'Normal': Normal,
     'HyperGeometric': HyperGeometric,
+    'Binomial': Binomial,
 }
 
 
@@ -238,6 +240,8 @@ class CalculatorComponent(WithDB, Column):
             self.calculator.__setattr__(f'_param_{attr}', float(value))
 
         area, graph = self.calculator.solve(*self.__get_intervals())
+        if self.controls[1].controls[1].controls:
+            self.controls[1].controls[1].controls.clear()
         self.controls[1].controls[1].controls.append(MatplotlibChart(figure=graph, original_size=True, expand=True))
         self.page.update()
         print(area)

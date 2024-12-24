@@ -21,7 +21,7 @@ class Normal:
         x = linspace(self._param_mu - 3 * self._param_sigma, self._param_mu + 3 * self._param_sigma, 512)  # Generate x values from -4 to 4
         y = norm.pdf(x, self._param_mu, self._param_sigma)  # Standard normal PDF (mean=0, stddev=1)
 
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig, ax = plt.subplots(figsize=(8, 6))
         ax.plot(x, y, label="Standard Normal Distribution", color="blue")
         ax.fill_between(
             x, y, 0, where=(x >= a) & (x <= b), color="skyblue", alpha=0.5, label=f"Area between {a} and {b}"
