@@ -46,7 +46,7 @@ class LoginReturn(WithDB, Column):
         ]
 
     def handle_login(self, event):
-        from app.src.components.calculator_components import CalculatorComponent as LocalCalculatorComponent
+        from app.src.components.calculator_components import CalculatorHandler as LocalCalculatorComponent
         if '@' in self.email_username.value:
             user_instance = get_user_by_email(self.db, self.email_username.value)
         else:

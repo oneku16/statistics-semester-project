@@ -24,7 +24,6 @@ from app.src.book.normal import Normal
 from app.src.components.base import WithDB
 from app.src.utils import switch_view
 from app.src.book.input_formats import LeftSided, RightSided, Interval
-from app.src.views.calculator import calculator
 
 
 class CalculatorsEnum(Enum):
@@ -180,7 +179,7 @@ class GraphColumn(Column):
         self.page.update()
 
 
-class CalculatorComponent(WithDB, Column):
+class CalculatorHandler(WithDB, Column):
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
